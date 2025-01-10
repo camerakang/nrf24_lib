@@ -5,12 +5,12 @@
     "keywords": "nrf24, rf24, wireless, communication",
     "repository": {
         "type": "git",
-        "url": "https://github.com/your-username/NRF24_Device.git"
+        "url": "https://github.com/camerakang/nrf24_lib.git"
     },
     "authors": [
         {
-            "name": "Your Name",
-            "email": "your.email@example.com",
+            "name": "KangZhichao",
+            "email": "kzc1209@qq.com",
             "maintainer": true
         }
     ],
