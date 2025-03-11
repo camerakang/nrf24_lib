@@ -1,48 +1,57 @@
 #include "NRF24_device.h"
-NRF24Device::NRF24Device(uint8_t ce, uint8_t csn, uint8_t mosi, uint8_t miso, uint8_t sck) {
+NRF24Device::NRF24Device(uint8_t ce, uint8_t csn, uint8_t mosi, uint8_t miso, uint8_t sck)
+{
     ce_pin = ce;
     csn_pin = csn;
     mosi_pin = mosi;
     miso_pin = miso;
     sck_pin = sck;
-    
+
     rf24_spi = new SPIClass(HSPI);
     radio = new RF24(ce_pin, csn_pin);
 }
 
-NRF24Device::~NRF24Device() {
+NRF24Device::~NRF24Device()
+{
     delete radio;
     delete rf24_spi;
 }
 
-bool NRF24Device::begin(const uint8_t* write_addr, const uint8_t* read_addr, bool is_sender) {
+bool NRF24Device::begin(const uint8_t *write_addr, const uint8_t *read_addr, bool is_sender)
+{
     rf24_spi->begin(sck_pin, miso_pin, mosi_pin, csn_pin);
-    
-    if (!radio->begin(rf24_spi, ce_pin, csn_pin)) {
+
+    if (!radio->begin(rf24_spi, ce_pin, csn_pin))
+    {
         return false;
     }
-    
+
     // 保存地址
-    memcpy(tx_address, write_addr, 5);
-    memcpy(rx_address, read_addr, 5);
-    
+    memcpy(tx_address, write_addr, 6);
+    memcpy(rx_address, read_addr, 6);
+
     radio->setPALevel(RF24_PA_LOW);
     radio->enableDynamicPayloads();
     radio->enableAckPayload();
     radio->setPayloadSize(32);
     radio->setDataRate(RF24_1MBPS);
-    
-    if (is_sender) {
+
+    if (is_sender)
+    {
         radio->openWritingPipe(tx_address);
         radio->openReadingPipe(1, rx_address);
         radio->stopListening();
         radio->setRetries(1, 1);
-    } else {
+    }
+    else
+    {
+        radio->setAutoAck(true);
         radio->openWritingPipe(tx_address);
         radio->openReadingPipe(1, rx_address);
         radio->startListening();
+        
     }
-    
+
     return true;
 }
 
@@ -104,4 +113,21 @@ size_t NRF24Device::receiveOnly(uint8_t *recv_buffer)
         return bytes;
     }
     return 0;
+}
+
+void NRF24Device::setChannel(uint8_t channel, bool is_sender)
+{
+    radio->stopListening();
+    delay(10);
+    radio->setChannel(channel * 8);
+    delay(10);
+    if (is_sender)
+    {
+        radio->stopListening();
+    }
+    else
+    {
+        radio->startListening();
+    }
+    radio->printPrettyDetails();
 }

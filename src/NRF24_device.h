@@ -1,9 +1,7 @@
-#ifndef NRF24_DEVICE_H
-#define NRF24_DEVICE_H
+#ifndef __NRF24_DEVICE__
+#define __NRF24_DEVICE__
 #include <SPI.h>
 #include "RF24.h"
-
-#define NRF24_DEVICE_VERSION "1.0.0"
 
 class NRF24Device {
 private:
@@ -16,8 +14,8 @@ private:
     uint8_t sck_pin;
 
     
-    uint8_t tx_address[6] = {0};  
-    uint8_t rx_address[6] = {0};
+    uint8_t tx_address[6];  // 写入地址
+    uint8_t rx_address[6];  // 读取地址
 
 public:
     /**
@@ -85,6 +83,13 @@ public:
      * @return 接收到的应答数据长度
      */
     size_t changeAddressAndSend(const uint8_t* address, uint8_t* data, int len, uint8_t* recv_data);
+
+    /**
+     * @brief 设置通道
+     * @param channel 通道号
+     * @param is_sender 是否为发送端
+     */
+    void setChannel(uint8_t channel, bool is_sender);
 };
 
 #endif
