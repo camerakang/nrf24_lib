@@ -131,3 +131,39 @@ void NRF24Device::setChannel(uint8_t channel, bool is_sender)
     }
     radio->printPrettyDetails();
 }
+
+bool NRF24Device::switchAddress(const uint8_t* write_addr, const uint8_t* read_addr, bool is_sender)
+{
+    // 停止监听
+    radio->stopListening();
+    delay(5);
+    
+    // 清空缓冲区
+    radio->flush_rx();
+    radio->flush_tx();
+    
+    // 保存新地址
+    memcpy(tx_address, write_addr, 6);
+    memcpy(rx_address, read_addr, 6);
+    
+    // 重新配置地址
+    if (is_sender)
+    {
+        radio->openWritingPipe(tx_address);
+        radio->openReadingPipe(1, rx_address);
+        radio->stopListening();
+        radio->setRetries(1, 1);
+    }
+    else
+    {
+        radio->setAutoAck(true);
+        radio->openWritingPipe(tx_address);
+        radio->openReadingPipe(1, rx_address);
+        radio->startListening();
+    }
+    
+    // 打印新的配置
+    radio->printPrettyDetails();
+    
+    return true;
+}

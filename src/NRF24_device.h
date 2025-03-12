@@ -90,6 +90,15 @@ public:
      * @param is_sender 是否为发送端
      */
     void setChannel(uint8_t channel, bool is_sender);
+
+    /**
+     * @brief 切换发送和接收地址
+     * @param write_addr 新的发送地址
+     * @param read_addr 新的接收地址
+     * @param is_sender 是否为发送端
+     * @return 是否切换成功
+     */
+    bool switchAddress(const uint8_t* write_addr, const uint8_t* read_addr, bool is_sender = false);
 };
 
 #endif
