@@ -1,4 +1,6 @@
 #include "NRF24_device.h"
+#include <string.h> // 为memcpy添加
+
 NRF24Device::NRF24Device(uint8_t ce, uint8_t csn, uint8_t mosi, uint8_t miso, uint8_t sck)
 {
     ce_pin = ce;
@@ -7,7 +9,12 @@ NRF24Device::NRF24Device(uint8_t ce, uint8_t csn, uint8_t mosi, uint8_t miso, ui
     miso_pin = miso;
     sck_pin = sck;
 
+#if defined(ESP32)
     rf24_spi = new SPIClass(HSPI);
+#else
+    // STM32的SPIClass构造函数参数顺序不同
+    rf24_spi = new SPIClass();
+#endif
     radio = new RF24(ce_pin, csn_pin);
 }
 
@@ -19,7 +26,16 @@ NRF24Device::~NRF24Device()
 
 bool NRF24Device::begin(const uint8_t *write_addr, const uint8_t *read_addr, bool is_sender)
 {
+#if defined(ESP32)
     rf24_spi->begin(sck_pin, miso_pin, mosi_pin, csn_pin);
+#else
+    // STM32使用不同的SPI初始化方法
+    rf24_spi->setMOSI(mosi_pin);
+    rf24_spi->setMISO(miso_pin);
+    rf24_spi->setSCLK(sck_pin);
+    rf24_spi->setSSEL(csn_pin);
+    rf24_spi->begin();
+#endif
 
     if (!radio->begin(rf24_spi, ce_pin, csn_pin))
     {
