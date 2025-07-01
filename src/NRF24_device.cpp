@@ -167,3 +167,58 @@ bool NRF24Device::switchAddress(const uint8_t* write_addr, const uint8_t* read_a
     
     return true;
 }
+
+void NRF24Device::flushBuffers()
+{
+    radio->flush_rx();
+    radio->flush_tx();
+}
+
+void NRF24Device::powerDown()
+{
+    radio->powerDown();
+}
+
+void NRF24Device::powerUp()
+{
+    radio->powerUp();
+    delay(5); // 给一些时间让模块启动
+}
+
+bool NRF24Device::reset(bool is_sender)
+{
+    // 停止监听
+    radio->stopListening();
+    delay(5);
+    
+    // 清空缓冲区
+    flushBuffers();
+    
+    // 重新配置无线参数
+    radio->setPALevel(RF24_PA_LOW);
+    radio->enableDynamicPayloads();
+    radio->enableAckPayload();
+    radio->setPayloadSize(32);
+    radio->setDataRate(RF24_1MBPS);
+    
+    // 根据模式重新配置
+    if (is_sender)
+    {
+        radio->openWritingPipe(tx_address);
+        radio->openReadingPipe(1, rx_address);
+        radio->stopListening();
+        radio->setRetries(1, 1);
+    }
+    else
+    {
+        radio->setAutoAck(true);
+        radio->openWritingPipe(tx_address);
+        radio->openReadingPipe(1, rx_address);
+        radio->startListening();
+    }
+    
+    // 打印新的配置
+    radio->printPrettyDetails();
+    
+    return true;
+}

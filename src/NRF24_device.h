@@ -99,6 +99,28 @@ public:
      * @return 是否切换成功
      */
     bool switchAddress(const uint8_t* write_addr, const uint8_t* read_addr, bool is_sender = false);
+
+    /**
+     * @brief 重置NRF24设备
+     * @param is_sender 是否为发送端
+     * @return 是否重置成功
+     */
+    bool reset(bool is_sender = false);
+
+    /**
+     * @brief 清空接收和发送缓冲区
+     */
+    void flushBuffers();
+    
+    /**
+     * @brief 关闭无线模块电源
+     */
+    void powerDown();
+    
+    /**
+     * @brief 启动无线模块电源
+     */
+    void powerUp();
 };
 
 #endif
