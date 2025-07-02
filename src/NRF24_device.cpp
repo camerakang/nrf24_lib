@@ -12,8 +12,8 @@ NRF24Device::NRF24Device(uint8_t ce, uint8_t csn, uint8_t mosi, uint8_t miso, ui
 #if defined(ESP32)
     rf24_spi = new SPIClass(HSPI);
 #else
-    // STM32的SPIClass构造函数参数顺序不同
-    rf24_spi = new SPIClass();
+
+    rf24_spi = new SPIClass(mosi_pin, miso_pin, sck_pin);
 #endif
     radio = new RF24(ce_pin, csn_pin);
 }
@@ -29,11 +29,6 @@ bool NRF24Device::begin(const uint8_t *write_addr, const uint8_t *read_addr, boo
 #if defined(ESP32)
     rf24_spi->begin(sck_pin, miso_pin, mosi_pin, csn_pin);
 #else
-    // STM32使用不同的SPI初始化方法
-    rf24_spi->setMOSI(mosi_pin);
-    rf24_spi->setMISO(miso_pin);
-    rf24_spi->setSCLK(sck_pin);
-    rf24_spi->setSSEL(csn_pin);
     rf24_spi->begin();
 #endif
 
